@@ -1,0 +1,40 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-3px)} }
+      @keyframes blink { 0%,80%,100%{opacity:1} 40%{opacity:0.25} }
+      .icon-float { animation: float 3s ease-in-out infinite; transform-origin: 100px 95px; }
+      .dot1 { animation: blink 1.4s ease-in-out infinite 0s; }
+      .dot2 { animation: blink 1.4s ease-in-out infinite 0.2s; }
+      .dot3 { animation: blink 1.4s ease-in-out infinite 0.4s; }
+    </style>
+  </defs>
+
+  <g class="icon-float">
+    <!-- Chat bubble -->
+    <rect x="20" y="10" width="160" height="140" rx="28" fill="#FF6B00"/>
+    <!-- Tail -->
+    <path d="M55 150 L40 185 L90 150Z" fill="#FF6B00"/>
+
+    <!-- Shopping bag -->
+    <rect x="62" y="63" width="76" height="62" rx="10" fill="white" opacity="0.95"/>
+    <!-- Handle -->
+    <path d="M80 63 Q80 41 100 41 Q120 41 120 63" fill="none" stroke="white" stroke-width="6" stroke-linecap="round" opacity="0.95"/>
+
+    <!-- Star sparkle -->
+    <circle cx="100" cy="94" r="4" fill="#FFD700"/>
+    <line x1="100" y1="86" x2="100" y2="78" stroke="#FFD700" stroke-width="2.2" stroke-linecap="round"/>
+    <line x1="100" y1="102" x2="100" y2="110" stroke="#FFD700" stroke-width="2.2" stroke-linecap="round"/>
+    <line x1="92"  y1="94"  x2="84"  y2="94"  stroke="#FFD700" stroke-width="2.2" stroke-linecap="round"/>
+    <line x1="108" y1="94"  x2="116" y2="94"  stroke="#FFD700" stroke-width="2.2" stroke-linecap="round"/>
+    <line x1="94"  y1="88"  x2="88"  y2="82"  stroke="#FFD700" stroke-width="1.8" stroke-linecap="round"/>
+    <line x1="106" y1="100" x2="112" y2="106" stroke="#FFD700" stroke-width="1.8" stroke-linecap="round"/>
+    <line x1="94"  y1="100" x2="88"  y2="106" stroke="#FFD700" stroke-width="1.8" stroke-linecap="round"/>
+    <line x1="106" y1="88"  x2="112" y2="82"  stroke="#FFD700" stroke-width="1.8" stroke-linecap="round"/>
+
+    <!-- Typing dots -->
+    <circle class="dot1" cx="82"  cy="133" r="5" fill="white" opacity="0.9"/>
+    <circle class="dot2" cx="100" cy="133" r="5" fill="white" opacity="0.9"/>
+    <circle class="dot3" cx="118" cy="133" r="5" fill="white" opacity="0.9"/>
+  </g>
+</svg>

@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import Navbar from './Components/Navbar'
 import Products from './Components/Products'
+import Slidebars from './Components/Slidebars'
 import PpitBox from './Components/PpitBox'
 import ForYou from './Pages/Foryou'
 import Fashion from './Pages/Fashion'
@@ -25,6 +26,7 @@ const App = () => {
     <div className='min-h-screen bg-gray-50'>
       <Navbar onOpenPpitBox={() => setIsPpitOpen(true)} />
       <Products />
+      <Slidebars />
       <main className='max-w-7xl mx-auto px-4 py-8'>
         <Routes>
           <Route path='/' element={<Navigate to='/products/for-you' replace />} />

@@ -9,21 +9,22 @@ import slideFive from '../assets/sidebar/Gemini_Generated_Image_hkprtihkprtihkpr
 import slidesix from '../assets/sidebar/Gemini_Generated_Image_2arfe32arfe32arf.png'
 import slideSeven from '../assets/sidebar/Gemini_Generated_Image_w0nrarw0nrarw0nr.png'
 import slideeight from '../assets/sidebar/Gemini_Generated_Image_329how329how329h.png'
-const Slidebars = () => {
-  const slides = useMemo(
+const Slidebars = ({ slides: incomingSlides = [], isLoading = false, errorMessage = '' }) => {
+  const defaultSlides = useMemo(
     () => [
       { id: 1, image: slideOne, alt: 'Shoppit promotional slide 1' },
       { id: 2, image: slideTwo, alt: 'Shoppit promotional slide 2' },
       { id: 3, image: slideThree, alt: 'Shoppit promotional slide 3' },
-          { id: 4, image: slideFour, alt: 'Shoppit promotional slide 4' },
-          { id: 5, image: slideFive, alt: 'Shoppit promotional slide 5' },
-          { id: 6, image: slidesix, alt: 'Shoppit promotional slide 6' },
-          { id: 7, image: slideSeven, alt: 'Shoppit promotional slide 7' },
-          { id: 8, image: slideeight, alt: 'Shoppit promotional slide 8' },
-
+      { id: 4, image: slideFour, alt: 'Shoppit promotional slide 4' },
+      { id: 5, image: slideFive, alt: 'Shoppit promotional slide 5' },
+      { id: 6, image: slidesix, alt: 'Shoppit promotional slide 6' },
+      { id: 7, image: slideSeven, alt: 'Shoppit promotional slide 7' },
+      { id: 8, image: slideeight, alt: 'Shoppit promotional slide 8' },
     ],
     [],
   )
+
+  const slides = incomingSlides.length > 0 ? incomingSlides : defaultSlides
 
   const [currentSlide, setCurrentSlide] = useState(0)
 
@@ -36,12 +37,51 @@ const Slidebars = () => {
   }
 
   useEffect(() => {
+    if (slides.length <= 1) {
+      return undefined
+    }
+
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length)
-    }, 4000)
+    }, 5000)
 
     return () => clearInterval(interval)
   }, [slides.length])
+
+  if (isLoading) {
+    return (
+      <section className='mx-auto mt-3 w-full max-w-7xl px-4'>
+        <div className='flex h-44 items-center justify-center rounded-xl bg-gray-100 shadow-sm sm:h-60 lg:h-72'>
+          <p className='text-sm font-medium text-gray-600'>Loading product slides...</p>
+        </div>
+      </section>
+    )
+  }
+
+  if (errorMessage) {
+    return (
+      <section className='mx-auto mt-3 w-full max-w-7xl px-4'>
+        <div className='flex h-44 items-center justify-center rounded-xl bg-red-50 shadow-sm sm:h-60 lg:h-72'>
+          <p className='text-sm font-medium text-red-600'>{errorMessage}</p>
+        </div>
+      </section>
+    )
+  }
+
+  if (slides.length === 0) {
+    return null
+  }
+
+  const activeSlide = slides[currentSlide]
+  const hasProductDetails = Boolean(activeSlide?.title)
+  const convertedInrPrice =
+    activeSlide?.price !== undefined
+      ? new Intl.NumberFormat('en-IN', {
+          style: 'currency',
+          currency: 'INR',
+          maximumFractionDigits: 2,
+        }).format(Number(activeSlide.price) * 83)
+      : ''
 
   return (
     <section className='mx-auto mt-3 w-full max-w-7xl px-4'>
@@ -53,13 +93,33 @@ const Slidebars = () => {
             <img
               key={slide.id}
               src={slide.image}
-              alt={slide.alt}
-              className={`absolute inset-0 h-full w-full object-cover transition-all duration-700 ${
-                isActive ? 'scale-100 opacity-100' : 'scale-105 opacity-0'
+              alt={slide.alt ?? slide.title ?? `Slide ${index + 1}`}
+              className={`absolute inset-0 h-full w-full transition-all duration-700 ${
+                hasProductDetails
+                  ? 'bg-white p-4 object-contain'
+                  : 'object-cover'
+              } ${
+                isActive ? 'scale-100 opacity-100' : 'scale-100 opacity-0'
               }`}
             />
           )
         })}
+
+        {hasProductDetails ? (
+          <div className='absolute bottom-4 left-4 z-20 max-w-xs rounded-lg bg-white/95 px-3 py-2 text-gray-900 shadow-lg ring-1 ring-black/10 backdrop-blur-sm sm:max-w-sm'>
+            <p className='line-clamp-1 text-[11px] font-medium text-gray-500'>
+              {activeSlide.category ?? 'Featured Product'}
+            </p>
+            <h3 className='line-clamp-1 text-sm font-semibold'>
+              {activeSlide.title}
+            </h3>
+            {activeSlide.price !== undefined ? (
+              <p className='mt-0.5 text-sm font-bold text-emerald-700'>
+                {convertedInrPrice}
+              </p>
+            ) : null}
+          </div>
+        ) : null}
 
         <button
           onClick={goToPrevious}
@@ -94,4 +154,4 @@ const Slidebars = () => {
   )
 }
 
-export default Slidebars;
+export default Slidebars

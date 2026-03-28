@@ -1,9 +1,11 @@
-import React, { useState } from 'react'
-import { Navigate, Route, Routes } from 'react-router-dom'
+import React, { useMemo, useState } from 'react'
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import Navbar from './Components/Navbar'
 import Products from './Components/Products'
 import Slidebars from './Components/Slidebars'
 import PpitBox from './Components/PpitBox'
+import useRouteProducts from './hooks/useRouteProducts'
+import { mapProductsToSlides } from './services/dummyJsonProducts'
 import ForYou from './Pages/Foryou'
 import Fashion from './Pages/Fashion'
 import Mobiles from './Pages/Mobiles'
@@ -21,12 +23,37 @@ import Furniture from './Pages/Furniture'
 
 const App = () => {
   const [isPpitOpen, setIsPpitOpen] = useState(false)
+  const location = useLocation()
+
+  const isForYouRoute =
+    location.pathname === '/products/for-you' || location.pathname === '/'
+
+  const {
+    routeProducts,
+    isLoading: isProductsLoading,
+    errorMessage: productsError,
+  } = useRouteProducts({ pathname: location.pathname, skipFetch: isForYouRoute })
+
+  const apiSlides = useMemo(() => {
+    return mapProductsToSlides(routeProducts, location.pathname)
+  }, [routeProducts, location.pathname])
 
   return (
     <div className='min-h-screen bg-gray-50'>
-      <Navbar onOpenPpitBox={() => setIsPpitOpen(true)} />
-      <Products />
-      <Slidebars />
+      <div className='sticky top-0 z-40 bg-white/95 backdrop-blur supports-backdrop-filter:bg-white/80'>
+        <Navbar onOpenPpitBox={() => setIsPpitOpen(true)} />
+        <Products />
+      </div>
+      {isForYouRoute ? (
+        <Slidebars key='for-you-static-slider' />
+      ) : (
+        <Slidebars
+          key={`dynamic-slider-${location.pathname}`}
+          slides={apiSlides}
+          isLoading={isProductsLoading}
+          errorMessage={productsError}
+        />
+      )}
       <main className='max-w-7xl mx-auto px-4 py-8'>
         <Routes>
           <Route path='/' element={<Navigate to='/products/for-you' replace />} />

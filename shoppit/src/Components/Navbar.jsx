@@ -172,8 +172,8 @@ const Navbar = ({ onOpenPpitBox }) => {
       </div>
 
       {isAuthModalOpen && (
-        <div className='fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4'>
-          <div className='w-full max-w-md rounded-xl bg-white p-6 shadow-xl'>
+        <div className='fixed inset-0 z-50 flex min-h-screen items-center justify-center bg-black/50 p-4'>
+          <div className='mx-auto w-full max-w-md rounded-xl bg-white p-6 shadow-xl'>
             <div className='mb-4 flex items-center justify-between'>
               <h2 className='text-xl font-semibold text-gray-800'>
                 {isLoginMode ? 'Login to Shoppit' : 'Create your Shoppit account'}

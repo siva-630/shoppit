@@ -3,6 +3,49 @@ const DUMMY_JSON_BASE_URL = 'https://dummyjson.com'
 export const MAX_SLIDES = 5
 const MAX_SUGGESTIONS = 10
 const FOR_YOU_SUGGESTION_LIMIT = 12
+const FASHION_SMALL_CARDS_LIMIT = 20
+const FASHION_PRICE_COLLECTION_LIMIT = 5
+const WEDDING_STYLE_SHOWCASE_LIMIT = 14
+
+const WEDDING_STYLE_SHOWCASE_CONFIG = [
+  { label: 'Embroidered Kurtas', promoText: 'From ₹499', categorySlug: 'mens-shirts', productIndex: 0 },
+  { label: "Kids' Ethnic Sets", promoText: 'From ₹249', categorySlug: 'tops', productIndex: 0 },
+  { label: 'Kolhapuri Chappals', promoText: 'From ₹219', categorySlug: 'mens-shoes', productIndex: 0 },
+  { label: 'Wedding Kurtas', promoText: 'Min. 70% Off', categorySlug: 'mens-shirts', productIndex: 1 },
+  { label: "Kids Dhoti Sets", promoText: 'From ₹299', categorySlug: 'tops', productIndex: 1 },
+  { label: 'Elegant Ethnics', promoText: 'New Season', categorySlug: 'mens-shirts', productIndex: 2 },
+  { label: 'Gold Braided Watches', promoText: 'Up to 80% Off', categorySlug: 'mens-shoes', productIndex: 1 },
+  { label: 'Bandhani Kurtas', promoText: 'From ₹299', categorySlug: 'mens-shirts', productIndex: 3 },
+  { label: 'Shaded Kurtas', promoText: 'Min. 50% Off', categorySlug: 'mens-shirts', productIndex: 4 },
+  { label: 'Pastel Shirts', promoText: 'From ₹399', categorySlug: 'mens-shirts', productIndex: 0 },
+  { label: 'Festive Saree Picks', promoText: 'From ₹699', categorySlug: 'womens-dresses', productIndex: 0 },
+  { label: 'Wedding Heels', promoText: 'From ₹449', categorySlug: 'womens-shoes', productIndex: 0 },
+  { label: 'Ethnic Clutches', promoText: 'From ₹349', categorySlug: 'womens-bags', productIndex: 0 },
+  { label: 'Statement Jewellery', promoText: 'From ₹299', categorySlug: 'womens-jewellery', productIndex: 0 },
+]
+
+const FASHION_REFERENCE_TYPE_CONFIG = [
+  { label: 'Menswear', audience: 'men', categorySlug: 'mens-shirts', productIndex: 0 },
+  { label: 'Men Casual Shirts', audience: 'men', categorySlug: 'mens-shirts', productIndex: 1 },
+  { label: 'Men Streetwear', audience: 'men', categorySlug: 'mens-shirts', productIndex: 2 },
+  { label: 'Men Formal Look', audience: 'men', categorySlug: 'mens-shirts', productIndex: 3 },
+  { label: 'Men Shoes', audience: 'men', categorySlug: 'mens-shoes', productIndex: 0 },
+  { label: 'Men Sneakers', audience: 'men', categorySlug: 'mens-shoes', productIndex: 1 },
+  { label: 'Women Dresses', audience: 'women', categorySlug: 'womens-dresses', productIndex: 0 },
+  { label: 'Western Dresses', audience: 'women', categorySlug: 'womens-dresses', productIndex: 1 },
+  { label: 'Ethnic Dresses', audience: 'women', categorySlug: 'womens-dresses', productIndex: 2 },
+  { label: 'Women Tops', audience: 'women', categorySlug: 'tops', productIndex: 0 },
+  { label: 'Women Casual Tops', audience: 'women', categorySlug: 'tops', productIndex: 1 },
+  { label: 'Women Shoes', audience: 'women', categorySlug: 'womens-shoes', productIndex: 0 },
+  { label: 'Women Heels', audience: 'women', categorySlug: 'womens-shoes', productIndex: 1 },
+  { label: 'Women Bags', audience: 'women', categorySlug: 'womens-bags', productIndex: 0 },
+  { label: 'Handbags', audience: 'women', categorySlug: 'womens-bags', productIndex: 1 },
+  { label: 'Jewellery', audience: 'women', categorySlug: 'womens-jewellery', productIndex: 0 },
+  { label: 'Sunglasses', audience: 'unisex', categorySlug: 'sunglasses', productIndex: 0 },
+  { label: 'Unisex Shades', audience: 'unisex', categorySlug: 'sunglasses', productIndex: 1 },
+]
+
+const FASHION_REFERENCE_TYPES_LIMIT = FASHION_REFERENCE_TYPE_CONFIG.length
 
 const ROUTE_PRODUCT_SOURCES = {
   '/products/fashion': {
@@ -235,4 +278,136 @@ export const fetchPreviousOrders = async (signal) => {
   }
 
   return fetchDefaultProducts(signal)
+}
+
+export const fetchFashionSmallCards = async (signal) => {
+  const fashionCategorySlugs = [
+    'mens-shirts',
+    'womens-dresses',
+    'tops',
+    'mens-shoes',
+    'womens-shoes',
+    'womens-bags',
+    'womens-jewellery',
+    'sunglasses',
+  ]
+
+  let products = []
+
+  for (const slug of fashionCategorySlugs) {
+    const categoryProducts = await fetchCategoryProducts(slug, signal)
+    products = dedupeProducts([...products, ...categoryProducts])
+
+    if (products.length >= FASHION_SMALL_CARDS_LIMIT) {
+      break
+    }
+  }
+
+  if (products.length === 0) {
+    const fallbackProducts = await fetchDefaultProducts(signal)
+    return dedupeProducts(fallbackProducts).slice(0, FASHION_SMALL_CARDS_LIMIT)
+  }
+
+  return products.slice(0, FASHION_SMALL_CARDS_LIMIT)
+}
+
+export const fetchFashionReferenceTypes = async (signal) => {
+  const categoryResults = await Promise.all(
+    FASHION_REFERENCE_TYPE_CONFIG.map((item) => fetchCategoryProducts(item.categorySlug, signal)),
+  )
+
+  const fallbackProducts = await fetchAllProductsPage({
+    limit: FASHION_REFERENCE_TYPES_LIMIT,
+    skip: 0,
+    signal,
+  })
+
+  return FASHION_REFERENCE_TYPE_CONFIG.map((item, index) => {
+    const preferredIndex = Number.isInteger(item.productIndex) ? item.productIndex : 0
+    const categoryProduct = categoryResults[index]?.[preferredIndex] ?? categoryResults[index]?.[0]
+    const fallbackProduct = fallbackProducts.products?.[index]
+    const selectedProduct = categoryProduct ?? fallbackProduct
+
+    return {
+      id: `${item.categorySlug}-${index}`,
+      label: item.label,
+      audience: item.audience,
+      image: selectedProduct?.thumbnail || selectedProduct?.images?.[0] || '',
+      alt: selectedProduct?.title || item.label,
+    }
+  }).filter((item) => Boolean(item.image))
+}
+
+export const fetchFashionPriceCollections = async (signal) => {
+  const fashionCategorySlugs = [
+    'womens-dresses',
+    'tops',
+    'mens-shirts',
+    'mens-shoes',
+    'womens-shoes',
+    'womens-bags',
+    'sunglasses',
+  ]
+
+  const categoryResults = await Promise.all(
+    fashionCategorySlugs.map((slug) => fetchCategoryProducts(slug, signal)),
+  )
+
+  let products = dedupeProducts(categoryResults.flat()).filter(
+    (product) => Number.isFinite(Number(product?.price)),
+  )
+
+  if (products.length < FASHION_PRICE_COLLECTION_LIMIT) {
+    const fallbackProducts = await fetchAllProductsPage({
+      limit: 20,
+      skip: 0,
+      signal,
+    })
+
+    products = dedupeProducts([...products, ...(fallbackProducts.products || [])]).filter(
+      (product) => Number.isFinite(Number(product?.price)),
+    )
+  }
+
+  const sortedByPrice = [...products].sort((first, second) => Number(first.price) - Number(second.price))
+
+  return sortedByPrice.slice(0, FASHION_PRICE_COLLECTION_LIMIT).map((product, index) => {
+    const inrValue = Number(product.price) * 83
+    const roundedPriceCap = Math.max(299, Math.ceil(inrValue / 100) * 100)
+
+    return {
+      id: `price-collection-${product.id}-${index}`,
+      title: product.title,
+      image: product.thumbnail || product.images?.[0] || '',
+      priceCap: roundedPriceCap,
+      category: product.category,
+    }
+  }).filter((item) => Boolean(item.image))
+}
+
+export const fetchWeddingStyleShowcase = async (signal) => {
+  const categoryResults = await Promise.all(
+    WEDDING_STYLE_SHOWCASE_CONFIG.map((item) => fetchCategoryProducts(item.categorySlug, signal)),
+  )
+
+  const fallbackProducts = await fetchAllProductsPage({
+    limit: WEDDING_STYLE_SHOWCASE_LIMIT,
+    skip: 0,
+    signal,
+  })
+
+  return WEDDING_STYLE_SHOWCASE_CONFIG.map((item, index) => {
+    const preferredIndex = Number.isInteger(item.productIndex) ? item.productIndex : 0
+    const categoryProduct = categoryResults[index]?.[preferredIndex] ?? categoryResults[index]?.[0]
+    const fallbackProduct = fallbackProducts.products?.[index]
+    const selectedProduct = categoryProduct ?? fallbackProduct
+
+    return {
+      id: `wedding-style-${item.categorySlug}-${index}`,
+      label: item.label,
+      promoText: item.promoText,
+      image: selectedProduct?.thumbnail || selectedProduct?.images?.[0] || '',
+      alt: selectedProduct?.title || item.label,
+    }
+  }).filter((item) => Boolean(item.image))
 }

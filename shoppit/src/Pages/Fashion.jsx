@@ -1,9 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import FashionReferenceTypes from '../Components/FashionReferenceTypes'
+import OccasionSpecificCollections from '../Components/OccasionSpecificCollections'
 import PriceWiseCollections from '../Components/PriceWiseCollections'
 import WeddingStyleShowcase from '../Components/WeddingStyleShowcase'
 import {
+  fetchOccasionSpecificCollections,
   fetchFashionPriceCollections,
   fetchFashionReferenceTypes,
   fetchFashionSmallCards,
@@ -23,6 +25,9 @@ const Fashion = () => {
   const [weddingStyles, setWeddingStyles] = useState([])
   const [isLoadingWeddingStyles, setIsLoadingWeddingStyles] = useState(false)
   const [weddingStylesError, setWeddingStylesError] = useState('')
+  const [occasionCollections, setOccasionCollections] = useState([])
+  const [isLoadingOccasions, setIsLoadingOccasions] = useState(false)
+  const [occasionError, setOccasionError] = useState('')
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
   const cardsContainerRef = useRef(null)
@@ -144,6 +149,35 @@ const Fashion = () => {
   }, [])
 
   useEffect(() => {
+    const controller = new AbortController()
+
+    const loadOccasionCollections = async () => {
+      setIsLoadingOccasions(true)
+      setOccasionError('')
+
+      try {
+        const occasionItems = await fetchOccasionSpecificCollections(controller.signal)
+        setOccasionCollections(occasionItems)
+      } catch (error) {
+        if (error.name !== 'AbortError') {
+          setOccasionCollections([])
+          setOccasionError('Unable to load occasion specific collections right now.')
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsLoadingOccasions(false)
+        }
+      }
+    }
+
+    loadOccasionCollections()
+
+    return () => {
+      controller.abort()
+    }
+  }, [])
+
+  useEffect(() => {
     const container = cardsContainerRef.current
 
     if (!container) {
@@ -244,6 +278,12 @@ const Fashion = () => {
         items={priceWiseCollections}
         isLoading={isLoadingPriceWise}
         errorMessage={priceWiseError}
+      />
+
+      <OccasionSpecificCollections
+        items={occasionCollections}
+        isLoading={isLoadingOccasions}
+        errorMessage={occasionError}
       />
 
       <WeddingStyleShowcase

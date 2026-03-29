@@ -6,6 +6,42 @@ const FOR_YOU_SUGGESTION_LIMIT = 12
 const FASHION_SMALL_CARDS_LIMIT = 20
 const FASHION_PRICE_COLLECTION_LIMIT = 5
 const WEDDING_STYLE_SHOWCASE_LIMIT = 14
+const OCCASION_SPECIFIC_COLLECTION_LIMIT = 5
+const MOBILE_TOP_DEALS_LIMIT = 5
+const PREMIUM_SMARTPHONE_DEALS_LIMIT = 10
+const MOBILE_RANGE_DEALS_LIMIT = 6
+const BEAUTY_LAUNCH_PARTY_LIMIT = 6
+const SKINCARE_CIRCLE_ITEMS_LIMIT = 8
+const BEAUTY_MINI_CARDS_LIMIT = 18
+
+const BEAUTY_MINI_CARD_CONFIG = [
+  { label: 'Global Scents', icon: 'sparkles', categorySlug: 'fragrances' },
+  { label: 'Skincare', icon: 'droplets', categorySlug: 'skin-care' },
+  { label: 'Hair Care', icon: 'scissors', categorySlug: 'beauty' },
+  { label: 'Body Care', icon: 'heart', categorySlug: 'skin-care' },
+  { label: 'Derma', icon: 'shield', categorySlug: 'skin-care' },
+  { label: 'Oral Care', icon: 'smile', categorySlug: 'beauty' },
+  { label: 'K-Beauty', icon: 'star', categorySlug: 'beauty' },
+  { label: 'Gifting', icon: 'gift', categorySlug: 'fragrances' },
+  { label: 'Beauty Supp.', icon: 'pill', categorySlug: 'beauty' },
+  { label: 'Perfumes', icon: 'sparkles', categorySlug: 'fragrances' },
+  { label: 'Eye', icon: 'eye', categorySlug: 'beauty' },
+  { label: 'Deos', icon: 'spray', categorySlug: 'fragrances' },
+  { label: 'Bath & Spa', icon: 'bath', categorySlug: 'skin-care' },
+  { label: 'Hygiene', icon: 'shield', categorySlug: 'beauty' },
+  { label: 'Grooming', icon: 'ribbon', categorySlug: 'beauty' },
+  { label: 'Premium', icon: 'crown', categorySlug: 'fragrances' },
+  { label: 'Face Makeup', icon: 'palette', categorySlug: 'beauty' },
+  { label: 'Lip', icon: 'heart', categorySlug: 'beauty' },
+]
+
+const OCCASION_SPECIFIC_CONFIG = [
+  { label: 'Office', caption: 'Polished picks', categorySlug: 'mens-shirts', productIndex: 0 },
+  { label: 'Vacation', caption: 'Resort-ready looks', categorySlug: 'womens-dresses', productIndex: 0 },
+  { label: 'Festive', caption: 'Celebration edits', categorySlug: 'tops', productIndex: 1 },
+  { label: 'Casual', caption: 'Everyday comfort', categorySlug: 'mens-shoes', productIndex: 0 },
+  { label: 'Party', caption: 'Evening glam', categorySlug: 'womens-shoes', productIndex: 0 },
+]
 
 const WEDDING_STYLE_SHOWCASE_CONFIG = [
   { label: 'Embroidered Kurtas', promoText: 'From ₹499', categorySlug: 'mens-shirts', productIndex: 0 },
@@ -406,6 +442,400 @@ export const fetchWeddingStyleShowcase = async (signal) => {
       id: `wedding-style-${item.categorySlug}-${index}`,
       label: item.label,
       promoText: item.promoText,
+      image: selectedProduct?.thumbnail || selectedProduct?.images?.[0] || '',
+      alt: selectedProduct?.title || item.label,
+    }
+  }).filter((item) => Boolean(item.image))
+}
+
+export const fetchOccasionSpecificCollections = async (signal) => {
+  const categoryResults = await Promise.all(
+    OCCASION_SPECIFIC_CONFIG.map((item) => fetchCategoryProducts(item.categorySlug, signal)),
+  )
+
+  const fallbackProducts = await fetchAllProductsPage({
+    limit: OCCASION_SPECIFIC_COLLECTION_LIMIT,
+    skip: 0,
+    signal,
+  })
+
+  return OCCASION_SPECIFIC_CONFIG.map((item, index) => {
+    const preferredIndex = Number.isInteger(item.productIndex) ? item.productIndex : 0
+    const categoryProduct = categoryResults[index]?.[preferredIndex] ?? categoryResults[index]?.[0]
+    const fallbackProduct = fallbackProducts.products?.[index]
+    const selectedProduct = categoryProduct ?? fallbackProduct
+
+    return {
+      id: `occasion-${item.categorySlug}-${index}`,
+      label: item.label,
+      caption: item.caption,
+      image: selectedProduct?.thumbnail || selectedProduct?.images?.[0] || '',
+      alt: selectedProduct?.title || item.label,
+    }
+  }).slice(0, OCCASION_SPECIFIC_COLLECTION_LIMIT)
+}
+
+export const fetchMobileBrands = async (signal) => {
+  const mobileCategorySlugs = ['smartphones', 'mobile-accessories', 'tablets']
+
+  const categoryResults = await Promise.all(
+    mobileCategorySlugs.map((slug) => fetchCategoryProducts(slug, signal)),
+  )
+
+  const mergedProducts = dedupeProducts(categoryResults.flat())
+  const brandMap = new Map()
+
+  mergedProducts.forEach((product) => {
+    const brandName = String(product?.brand || '').trim()
+
+    if (!brandName) {
+      return
+    }
+
+    const normalizedBrand = brandName.toLowerCase()
+
+    if (brandMap.has(normalizedBrand)) {
+      return
+    }
+
+    brandMap.set(normalizedBrand, {
+      id: `mobile-brand-${normalizedBrand.replace(/\s+/g, '-')}`,
+      label: brandName,
+      image: product.thumbnail || product.images?.[0] || '',
+      alt: `${brandName} phones`,
+    })
+  })
+
+  if (brandMap.size < 5) {
+    const fallbackProducts = await fetchAllProductsPage({
+      limit: 40,
+      skip: 0,
+      signal,
+    })
+
+    fallbackProducts.products.forEach((product) => {
+      const brandName = String(product?.brand || '').trim()
+      const searchableText = `${product?.title ?? ''} ${product?.description ?? ''} ${product?.category ?? ''}`.toLowerCase()
+
+      if (!brandName || !/phone|mobile|tablet|smartphone|accessor/.test(searchableText)) {
+        return
+      }
+
+      const normalizedBrand = brandName.toLowerCase()
+
+      if (brandMap.has(normalizedBrand)) {
+        return
+      }
+
+      brandMap.set(normalizedBrand, {
+        id: `mobile-brand-${normalizedBrand.replace(/\s+/g, '-')}`,
+        label: brandName,
+        image: product.thumbnail || product.images?.[0] || '',
+        alt: `${brandName} phones`,
+      })
+    })
+  }
+
+  const fallbackBrands = ['iPhone', 'Motorola', 'Vivo', 'OPPO', 'Samsung']
+
+  fallbackBrands.forEach((brand) => {
+    const normalizedBrand = brand.toLowerCase()
+
+    if (brandMap.has(normalizedBrand)) {
+      return
+    }
+
+    brandMap.set(normalizedBrand, {
+      id: `mobile-brand-${normalizedBrand}`,
+      label: brand,
+      image: '',
+      alt: `${brand} phones`,
+    })
+  })
+
+  return Array.from(brandMap.values()).sort((first, second) => first.label.localeCompare(second.label))
+}
+
+export const fetchMobileTopDeals = async (signal) => {
+  const categoryResults = await Promise.all([
+    fetchCategoryProducts('smartphones', signal),
+    fetchCategoryProducts('mobile-accessories', signal),
+  ])
+
+  let deals = dedupeProducts(categoryResults.flat()).filter((product) => {
+    const searchText = `${product?.title ?? ''} ${product?.description ?? ''} ${product?.category ?? ''}`.toLowerCase()
+    return /phone|mobile|smartphone/.test(searchText)
+  })
+
+  if (deals.length < MOBILE_TOP_DEALS_LIMIT) {
+    const searchFallback = await fetchSearchProducts('smartphone', signal, 20)
+    deals = dedupeProducts([...deals, ...searchFallback])
+  }
+
+  if (deals.length < MOBILE_TOP_DEALS_LIMIT) {
+    const allProductsFallback = await fetchAllProductsPage({
+      limit: 50,
+      skip: 0,
+      signal,
+    })
+
+    const phoneOnlyFallback = (allProductsFallback.products || []).filter((product) => {
+      const searchText = `${product?.title ?? ''} ${product?.description ?? ''} ${product?.category ?? ''}`.toLowerCase()
+      return /phone|mobile|smartphone/.test(searchText)
+    })
+
+    deals = dedupeProducts([...deals, ...phoneOnlyFallback])
+  }
+
+  const sortedDeals = [...deals].sort((first, second) => {
+    const firstDiscount = Number(first?.discountPercentage) || 0
+    const secondDiscount = Number(second?.discountPercentage) || 0
+    return secondDiscount - firstDiscount
+  })
+
+  return sortedDeals.slice(0, MOBILE_TOP_DEALS_LIMIT).map((product, index) => {
+    const inrBasePrice = Number(product.price) * 83
+    const roundedDealPrice = Math.max(6999, Math.round(inrBasePrice / 100) * 100)
+
+    return {
+      id: `mobile-top-deal-${product.id}-${index}`,
+      title: product.title,
+      image: product.thumbnail || product.images?.[0] || '',
+      priceText: `From ₹${new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 }).format(roundedDealPrice)}`,
+    }
+  }).filter((item) => Boolean(item.image))
+}
+
+export const fetchPremiumSmartphoneDeals = async (signal) => {
+  const categoryResults = await Promise.all([
+    fetchCategoryProducts('smartphones', signal),
+    fetchCategoryProducts('tablets', signal),
+  ])
+
+  let products = dedupeProducts(categoryResults.flat()).filter((product) => {
+    const searchText = `${product?.title ?? ''} ${product?.description ?? ''} ${product?.category ?? ''}`.toLowerCase()
+    return /phone|smartphone|galaxy|iphone|pixel|vivo|oppo|xiaomi|oneplus/.test(searchText)
+  })
+
+  if (products.length < PREMIUM_SMARTPHONE_DEALS_LIMIT) {
+    const searchFallback = await fetchSearchProducts('premium smartphone', signal, 30)
+    products = dedupeProducts([...products, ...searchFallback])
+  }
+
+  if (products.length < PREMIUM_SMARTPHONE_DEALS_LIMIT) {
+    const pageOne = await fetchAllProductsPage({
+      limit: 60,
+      skip: 0,
+      signal,
+    })
+
+    const pageTwo = await fetchAllProductsPage({
+      limit: 60,
+      skip: 60,
+      signal,
+    })
+
+    const premiumFallback = [...(pageOne.products || []), ...(pageTwo.products || [])].filter((product) => {
+      const searchText = `${product?.title ?? ''} ${product?.description ?? ''} ${product?.category ?? ''}`.toLowerCase()
+      return /phone|smartphone|galaxy|iphone|pixel|vivo|oppo|xiaomi|oneplus/.test(searchText)
+    })
+
+    products = dedupeProducts([...products, ...premiumFallback])
+  }
+
+  const rankedDeals = [...products].sort((first, second) => {
+    const firstScore = (Number(first?.rating) || 0) + (Number(first?.discountPercentage) || 0) / 10
+    const secondScore = (Number(second?.rating) || 0) + (Number(second?.discountPercentage) || 0) / 10
+    return secondScore - firstScore
+  })
+
+  return rankedDeals.slice(0, PREMIUM_SMARTPHONE_DEALS_LIMIT).map((product, index) => {
+    const inrBasePrice = Number(product.price) * 83
+    const roundedPrice = Math.max(29999, Math.round(inrBasePrice / 100) * 100)
+
+    return {
+      id: `premium-smartphone-deal-${product.id}-${index}`,
+      title: product.title,
+      image: product.thumbnail || product.images?.[0] || '',
+      priceText: `From ₹${new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 }).format(roundedPrice)}*`,
+    }
+  }).filter((item) => Boolean(item.image))
+}
+
+export const fetchMobileRangeDeals = async (signal) => {
+  const categoryResults = await Promise.all([
+    fetchCategoryProducts('smartphones', signal),
+    fetchCategoryProducts('mobile-accessories', signal),
+    fetchCategoryProducts('tablets', signal),
+  ])
+
+  let mobileProducts = dedupeProducts(categoryResults.flat()).filter((product) => {
+    const searchText = `${product?.title ?? ''} ${product?.description ?? ''} ${product?.category ?? ''}`.toLowerCase()
+    return /phone|mobile|smartphone|iphone|galaxy|vivo|oppo|oneplus|xiaomi|redmi|realme|pixel|nothing/.test(searchText)
+  })
+
+  if (mobileProducts.length < MOBILE_RANGE_DEALS_LIMIT * 2) {
+    const searchFallback = await fetchSearchProducts('smartphone', signal, 40)
+    mobileProducts = dedupeProducts([...mobileProducts, ...searchFallback])
+  }
+
+  if (mobileProducts.length < MOBILE_RANGE_DEALS_LIMIT * 2) {
+    const pageOne = await fetchAllProductsPage({ limit: 80, skip: 0, signal })
+    const pageTwo = await fetchAllProductsPage({ limit: 80, skip: 80, signal })
+
+    const broaderFallback = [...(pageOne.products || []), ...(pageTwo.products || [])].filter((product) => {
+      const searchText = `${product?.title ?? ''} ${product?.description ?? ''} ${product?.category ?? ''}`.toLowerCase()
+      return /phone|mobile|smartphone|iphone|galaxy|vivo|oppo|oneplus|xiaomi|redmi|realme|pixel|nothing/.test(searchText)
+    })
+
+    mobileProducts = dedupeProducts([...mobileProducts, ...broaderFallback])
+  }
+
+  const rankedProducts = [...mobileProducts].sort((first, second) => {
+    const firstScore = (Number(first?.rating) || 0) + (Number(first?.discountPercentage) || 0) / 8
+    const secondScore = (Number(second?.rating) || 0) + (Number(second?.discountPercentage) || 0) / 8
+    return secondScore - firstScore
+  })
+
+  const toDealCard = (product, index, bucket) => {
+    const inrPrice = Math.max(6999, Math.round((Number(product?.price) * 83) / 100) * 100)
+    const discount = Math.max(5, Math.round(Number(product?.discountPercentage) || 0))
+
+    return {
+      id: `${bucket}-deal-${product.id}-${index}`,
+      title: product.title,
+      image: product.thumbnail || product.images?.[0] || '',
+      priceText: `₹${new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 }).format(inrPrice)}`,
+      offerText: `${discount}% OFF`,
+    }
+  }
+
+  const midRange = rankedProducts
+    .filter((product) => {
+      const inrPrice = Number(product?.price) * 83
+      return inrPrice >= 20000 && inrPrice <= 45000
+    })
+    .slice(0, MOBILE_RANGE_DEALS_LIMIT)
+    .map((product, index) => toDealCard(product, index, 'mid'))
+    .filter((item) => Boolean(item.image))
+
+  const budgetRange = rankedProducts
+    .filter((product) => {
+      const inrPrice = Number(product?.price) * 83
+      return inrPrice < 20000
+    })
+    .slice(0, MOBILE_RANGE_DEALS_LIMIT)
+    .map((product, index) => toDealCard(product, index, 'budget'))
+    .filter((item) => Boolean(item.image))
+
+  return { midRange, budgetRange }
+}
+
+export const fetchBeautyLaunchPartyDeals = async (signal) => {
+  const categoryResults = await Promise.all([
+    fetchCategoryProducts('fragrances', signal),
+    fetchCategoryProducts('beauty', signal),
+    fetchCategoryProducts('skin-care', signal),
+  ])
+
+  let products = dedupeProducts(categoryResults.flat()).filter((product) => {
+    const searchText = `${product?.title ?? ''} ${product?.description ?? ''} ${product?.category ?? ''}`.toLowerCase()
+    return /perfume|fragrance|serum|cream|beauty|skin|care|makeup/.test(searchText)
+  })
+
+  if (products.length < BEAUTY_LAUNCH_PARTY_LIMIT) {
+    const searchFallback = await fetchSearchProducts('perfume serum beauty', signal, 24)
+    products = dedupeProducts([...products, ...searchFallback])
+  }
+
+  if (products.length < BEAUTY_LAUNCH_PARTY_LIMIT) {
+    const page = await fetchAllProductsPage({ limit: 60, skip: 0, signal })
+    const fallback = (page.products || []).filter((product) => {
+      const searchText = `${product?.title ?? ''} ${product?.description ?? ''} ${product?.category ?? ''}`.toLowerCase()
+      return /perfume|fragrance|serum|cream|beauty|skin|care|makeup/.test(searchText)
+    })
+    products = dedupeProducts([...products, ...fallback])
+  }
+
+  return products.slice(0, BEAUTY_LAUNCH_PARTY_LIMIT).map((product, index) => {
+    const discount = Math.max(10, Math.round(Number(product?.discountPercentage) || 0))
+    return {
+      id: `beauty-launch-${product.id}-${index}`,
+      title: product.title,
+      image: product.thumbnail || product.images?.[0] || '',
+      offerText: `Up to ${discount}% Off`,
+    }
+  }).filter((item) => Boolean(item.image))
+}
+
+export const fetchSkincareCircleItems = async (signal) => {
+  const categoryResults = await Promise.all([
+    fetchCategoryProducts('skin-care', signal),
+    fetchCategoryProducts('beauty', signal),
+  ])
+
+  let products = dedupeProducts(categoryResults.flat()).filter((product) => {
+    const searchText = `${product?.title ?? ''} ${product?.description ?? ''} ${product?.category ?? ''}`.toLowerCase()
+    return /skin|care|cleanser|serum|moisturizer|cream|sunscreen|lotion|face/.test(searchText)
+  })
+
+  if (products.length < SKINCARE_CIRCLE_ITEMS_LIMIT) {
+    const searchFallback = await fetchSearchProducts('skincare serum moisturizer', signal, 30)
+    products = dedupeProducts([...products, ...searchFallback])
+  }
+
+  if (products.length < SKINCARE_CIRCLE_ITEMS_LIMIT) {
+    const fallbackPage = await fetchAllProductsPage({
+      limit: 80,
+      skip: 0,
+      signal,
+    })
+
+    const fallbackSkincare = (fallbackPage.products || []).filter((product) => {
+      const searchText = `${product?.title ?? ''} ${product?.description ?? ''} ${product?.category ?? ''}`.toLowerCase()
+      return /skin|care|cleanser|serum|moisturizer|cream|sunscreen|lotion|face/.test(searchText)
+    })
+
+    products = dedupeProducts([...products, ...fallbackSkincare])
+  }
+
+  return products.slice(0, SKINCARE_CIRCLE_ITEMS_LIMIT).map((product, index) => ({
+    id: `skincare-circle-${product.id}-${index}`,
+    title: product.title,
+    image: product.thumbnail || product.images?.[0] || '',
+    subtitle: product.brand || 'Skin Care',
+  })).filter((item) => Boolean(item.image))
+}
+
+export const fetchBeautyMiniCards = async (signal) => {
+  const categoryResults = await Promise.all([
+    fetchCategoryProducts('beauty', signal),
+    fetchCategoryProducts('skin-care', signal),
+    fetchCategoryProducts('fragrances', signal),
+  ])
+
+  const categoryMap = {
+    beauty: categoryResults[0] || [],
+    'skin-care': categoryResults[1] || [],
+    fragrances: categoryResults[2] || [],
+  }
+
+  const fallbackPage = await fetchAllProductsPage({
+    limit: BEAUTY_MINI_CARDS_LIMIT,
+    skip: 0,
+    signal,
+  })
+
+  return BEAUTY_MINI_CARD_CONFIG.slice(0, BEAUTY_MINI_CARDS_LIMIT).map((item, index) => {
+    const categoryProducts = categoryMap[item.categorySlug] || []
+    const categoryProduct = categoryProducts[index % Math.max(categoryProducts.length, 1)]
+    const fallbackProduct = fallbackPage.products?.[index]
+    const selectedProduct = categoryProduct || fallbackProduct
+
+    return {
+      id: `beauty-mini-card-${item.label.toLowerCase().replace(/\s+/g, '-')}-${index}`,
+      label: item.label,
+      icon: item.icon,
       image: selectedProduct?.thumbnail || selectedProduct?.images?.[0] || '',
       alt: selectedProduct?.title || item.label,
     }

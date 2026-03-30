@@ -157,7 +157,16 @@ const AllBeautyProductsFeed = () => {
           return (
             <article
               key={product.id}
-              className='group rounded-xl bg-white p-2 ring-1 ring-pink-100 transition hover:shadow-md'
+              className='group cursor-pointer rounded-xl bg-white p-2 ring-1 ring-pink-100 transition hover:shadow-md'
+              role='button'
+              tabIndex={0}
+              onClick={() => window.open(`/product/${product.id}`, '_blank', 'noopener,noreferrer')}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault()
+                  window.open(`/product/${product.id}`, '_blank', 'noopener,noreferrer')
+                }
+              }}
             >
               <div className='relative flex h-44 items-center justify-center overflow-hidden rounded-lg bg-pink-50 p-2 sm:h-52'>
                 <span className='absolute left-2 top-2 rounded-full bg-white px-2 py-1 text-xs font-semibold text-slate-700 ring-1 ring-pink-100'>

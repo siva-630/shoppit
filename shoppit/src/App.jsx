@@ -20,6 +20,8 @@ import TwoWheelers from './Pages/TwoWheelers'
 import SportsFitness from './Pages/SportsFitness'
 import BooksMore from './Pages/BooksMore'
 import Furniture from './Pages/Furniture'
+import SearchResults from './Pages/SearchResults'
+import ProductDetails from './Pages/ProductDetails'
 
 const App = () => {
   const [isPpitOpen, setIsPpitOpen] = useState(false)
@@ -27,12 +29,15 @@ const App = () => {
 
   const isForYouRoute =
     location.pathname === '/products/for-you' || location.pathname === '/'
+  const isSearchRoute = location.pathname === '/search'
+  const isProductDetailsRoute = location.pathname.startsWith('/product/')
+  const hasMinimalHeaderLayout = isSearchRoute || isProductDetailsRoute
 
   const {
     routeProducts,
     isLoading: isProductsLoading,
     errorMessage: productsError,
-  } = useRouteProducts({ pathname: location.pathname, skipFetch: isForYouRoute })
+  } = useRouteProducts({ pathname: location.pathname, skipFetch: isForYouRoute || hasMinimalHeaderLayout })
 
   const apiSlides = useMemo(() => {
     return mapProductsToSlides(routeProducts, location.pathname)
@@ -42,21 +47,25 @@ const App = () => {
     <div className='min-h-screen bg-gray-50'>
       <div className='sticky top-0 z-40 bg-white/95 backdrop-blur supports-backdrop-filter:bg-white/80'>
         <Navbar onOpenPpitBox={() => setIsPpitOpen(true)} />
-        <Products />
+        {!hasMinimalHeaderLayout && <Products />}
       </div>
-      {isForYouRoute ? (
-        <Slidebars key='for-you-static-slider' />
-      ) : (
-        <Slidebars
-          key={`dynamic-slider-${location.pathname}`}
-          slides={apiSlides}
-          isLoading={isProductsLoading}
-          errorMessage={productsError}
-        />
+      {!hasMinimalHeaderLayout && (
+        isForYouRoute ? (
+          <Slidebars key='for-you-static-slider' />
+        ) : (
+          <Slidebars
+            key={`dynamic-slider-${location.pathname}`}
+            slides={apiSlides}
+            isLoading={isProductsLoading}
+            errorMessage={productsError}
+          />
+        )
       )}
       <main className='max-w-7xl mx-auto px-4 py-8'>
         <Routes>
           <Route path='/' element={<Navigate to='/products/for-you' replace />} />
+          <Route path='/search' element={<SearchResults />} />
+          <Route path='/product/:productId' element={<ProductDetails />} />
           <Route path='/products/for-you' element={<ForYou />} />
           <Route path='/products/fashion' element={<Fashion />} />
           <Route path='/products/mobiles' element={<Mobiles />} />

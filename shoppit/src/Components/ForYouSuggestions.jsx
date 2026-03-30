@@ -153,7 +153,16 @@ const ForYouSuggestions = ({ onAddToWishlist, wishlistProductIds = [] }) => {
         {formattedProducts.map((product) => (
           <article
             key={product.id}
-            className='min-w-56 max-w-56 snap-start rounded-xl bg-white p-2 shadow-sm ring-1 ring-slate-200'
+            className='min-w-56 max-w-56 snap-start cursor-pointer rounded-xl bg-white p-2 shadow-sm ring-1 ring-slate-200'
+            role='button'
+            tabIndex={0}
+            onClick={() => window.open(`/product/${product.id}`, '_blank', 'noopener,noreferrer')}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault()
+                window.open(`/product/${product.id}`, '_blank', 'noopener,noreferrer')
+              }
+            }}
           >
             <div className='flex h-44 items-center justify-center rounded-lg bg-slate-100 p-2'>
               <img
@@ -175,13 +184,20 @@ const ForYouSuggestions = ({ onAddToWishlist, wishlistProductIds = [] }) => {
               </div>
               <button
                 type='button'
+                onClick={(event) => {
+                  event.stopPropagation()
+                  window.open(`/product/${product.id}`, '_blank', 'noopener,noreferrer')
+                }}
                 className='mt-1 text-xl font-bold leading-none text-slate-900 transition hover:text-slate-700'
               >
                 View Store
               </button>
               <button
                 type='button'
-                onClick={() => onAddToWishlist?.(product)}
+                onClick={(event) => {
+                  event.stopPropagation()
+                  onAddToWishlist?.(product)
+                }}
                 disabled={wishlistProductIds.includes(product.id)}
                 className='mt-2 w-full rounded-md bg-orange-500 px-2 py-1.5 text-xs font-semibold text-white transition hover:bg-orange-600 disabled:cursor-default disabled:bg-orange-200 disabled:text-orange-700'
               >

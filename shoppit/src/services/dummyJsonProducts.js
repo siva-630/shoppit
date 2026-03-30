@@ -201,6 +201,49 @@ export const fetchAllProductsPage = async ({ limit = 18, skip = 0, signal } = {}
   }
 }
 
+export const fetchSearchSuggestions = async (query, signal, limit = 8) => {
+  const normalizedQuery = String(query || '').trim()
+
+  if (!normalizedQuery) {
+    return []
+  }
+
+  const products = await fetchSearchProducts(normalizedQuery, signal, limit)
+
+  return products.map((product) => ({
+    id: product.id,
+    title: product.title,
+    category: product.category,
+    thumbnail: product.thumbnail || product.images?.[0] || '',
+  }))
+}
+
+export const fetchProductsBySearchQuery = async (query, signal, limit = 100) => {
+  const normalizedQuery = String(query || '').trim()
+
+  if (!normalizedQuery) {
+    return []
+  }
+
+  return fetchSearchProducts(normalizedQuery, signal, limit)
+}
+
+export const fetchProductById = async (productId, signal) => {
+  const normalizedId = Number(productId)
+
+  if (!Number.isFinite(normalizedId) || normalizedId <= 0) {
+    throw new Error('Invalid product id')
+  }
+
+  const response = await fetch(`${DUMMY_JSON_BASE_URL}/products/${normalizedId}`, { signal })
+
+  if (!response.ok) {
+    throw new Error('Unable to fetch product details')
+  }
+
+  return response.json()
+}
+
 export const fetchProductsForRoute = async (pathname, signal) => {
   const routeSource = ROUTE_PRODUCT_SOURCES[pathname]
 

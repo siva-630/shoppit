@@ -139,7 +139,16 @@ const AllProductsInfiniteFeed = () => {
           return (
             <article
               key={product.id}
-              className='rounded-xl bg-white p-2 ring-1 ring-slate-200 transition hover:shadow-sm'
+              className='cursor-pointer rounded-xl bg-white p-2 ring-1 ring-slate-200 transition hover:shadow-sm'
+              role='button'
+              tabIndex={0}
+              onClick={() => window.open(`/product/${product.id}`, '_blank', 'noopener,noreferrer')}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault()
+                  window.open(`/product/${product.id}`, '_blank', 'noopener,noreferrer')
+                }
+              }}
             >
               <div className='relative flex h-48 items-center justify-center overflow-hidden rounded-lg bg-slate-100 p-2 sm:h-56'>
                 {product.rating ? (

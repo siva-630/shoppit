@@ -159,7 +159,16 @@ const AllMobilesUntilLimit = () => {
           return (
             <article
               key={product.id}
-              className='group rounded-xl bg-white p-2 ring-1 ring-slate-200 transition hover:shadow-md'
+              className='group cursor-pointer rounded-xl bg-white p-2 ring-1 ring-slate-200 transition hover:shadow-md'
+              role='button'
+              tabIndex={0}
+              onClick={() => window.open(`/product/${product.id}`, '_blank', 'noopener,noreferrer')}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault()
+                  window.open(`/product/${product.id}`, '_blank', 'noopener,noreferrer')
+                }
+              }}
             >
               <div className='flex h-44 items-center justify-center overflow-hidden rounded-lg bg-slate-100 p-2 sm:h-52'>
                 <img

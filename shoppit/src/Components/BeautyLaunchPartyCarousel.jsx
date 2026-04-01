@@ -1,7 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 const BeautyLaunchPartyCarousel = ({ items = [], isLoading = false, errorMessage = '' }) => {
+  const navigate = useNavigate()
   const trackRef = useRef(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
@@ -69,7 +71,16 @@ const BeautyLaunchPartyCarousel = ({ items = [], isLoading = false, errorMessage
             {items.map((item) => (
               <article
                 key={item.id}
-                className='group w-61 shrink-0 overflow-hidden rounded-3xl border border-pink-200 bg-[#ffd8cf] shadow-sm transition hover:-translate-y-0.5 hover:shadow-md'
+                className='group w-61 shrink-0 cursor-pointer overflow-hidden rounded-3xl border border-pink-200 bg-[#ffd8cf] shadow-sm transition hover:-translate-y-0.5 hover:shadow-md'
+                role='button'
+                tabIndex={0}
+                onClick={() => item.productId && navigate(`/product/${item.productId}`)}
+                onKeyDown={(event) => {
+                  if ((event.key === 'Enter' || event.key === ' ') && item.productId) {
+                    event.preventDefault()
+                    navigate(`/product/${item.productId}`)
+                  }
+                }}
               >
                 <div className='h-78 overflow-hidden'>
                   <img

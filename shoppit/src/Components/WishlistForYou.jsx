@@ -1,7 +1,9 @@
 import React from 'react'
 import { Heart, Trash2 } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 const WishlistForYou = ({ items, onRemove }) => {
+  const navigate = useNavigate()
   if (!items.length) {
     return (
       <section className='mt-6 rounded-2xl border border-orange-200 bg-orange-100/80 p-5'>
@@ -32,7 +34,16 @@ const WishlistForYou = ({ items, onRemove }) => {
         {items.map((item) => (
           <article
             key={item.id}
-            className='min-w-52 max-w-52 rounded-xl bg-white p-2 shadow-sm ring-1 ring-orange-200'
+            className='min-w-52 max-w-52 cursor-pointer rounded-xl bg-white p-2 shadow-sm ring-1 ring-orange-200'
+            role='button'
+            tabIndex={0}
+            onClick={() => navigate(`/product/${item.id}`)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault()
+                navigate(`/product/${item.id}`)
+              }
+            }}
           >
             <div className='flex h-36 items-center justify-center rounded-lg bg-orange-50 p-2'>
               <img
@@ -52,7 +63,10 @@ const WishlistForYou = ({ items, onRemove }) => {
 
               <button
                 type='button'
-                onClick={() => onRemove(item.id)}
+                onClick={(event) => {
+                  event.stopPropagation()
+                  onRemove(item.id)
+                }}
                 className='mt-2 inline-flex items-center gap-1 rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 ring-1 ring-orange-200 transition hover:bg-orange-100'
               >
                 <Trash2 className='h-3.5 w-3.5' />

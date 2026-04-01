@@ -1,7 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 const MobileBrandsCarousel = ({ items = [], isLoading = false, errorMessage = '' }) => {
+  const navigate = useNavigate()
   const trackRef = useRef(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
@@ -72,7 +74,16 @@ const MobileBrandsCarousel = ({ items = [], isLoading = false, errorMessage = ''
             {items.map((item) => (
               <article
                 key={item.id}
-                className='w-30 shrink-0 rounded-2xl border border-slate-200 bg-sky-50/70 p-2 text-center'
+                className='w-30 shrink-0 cursor-pointer rounded-2xl border border-slate-200 bg-sky-50/70 p-2 text-center'
+                role='button'
+                tabIndex={0}
+                onClick={() => item.productId && navigate(`/product/${item.productId}`)}
+                onKeyDown={(event) => {
+                  if ((event.key === 'Enter' || event.key === ' ') && item.productId) {
+                    event.preventDefault()
+                    navigate(`/product/${item.productId}`)
+                  }
+                }}
               >
                 <div className='mx-auto flex h-20 w-20 items-center justify-center overflow-hidden rounded-xl bg-sky-100'>
                   {item.image ? (

@@ -16,6 +16,7 @@ import {
   SprayCan,
   Star,
 } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 const iconMap = {
   bath: Bath,
@@ -36,6 +37,7 @@ const iconMap = {
 }
 
 const BeautyMiniCards = ({ items = [], isLoading = false, errorMessage = '' }) => {
+  const navigate = useNavigate()
   if (isLoading) {
     return (
       <section className='rounded-2xl border border-pink-200 bg-white p-4 shadow-sm'>
@@ -64,7 +66,19 @@ const BeautyMiniCards = ({ items = [], isLoading = false, errorMessage = '' }) =
             const Icon = iconMap[item.icon] || Sparkles
 
             return (
-              <article key={item.id} className='group text-center'>
+              <article
+                key={item.id}
+                className='group cursor-pointer text-center'
+                role='button'
+                tabIndex={0}
+                onClick={() => item.productId && navigate(`/product/${item.productId}`)}
+                onKeyDown={(event) => {
+                  if ((event.key === 'Enter' || event.key === ' ') && item.productId) {
+                    event.preventDefault()
+                    navigate(`/product/${item.productId}`)
+                  }
+                }}
+              >
                 <div className='relative overflow-hidden rounded-2xl bg-pink-100 ring-1 ring-pink-200'>
                   <img
                     src={item.image}

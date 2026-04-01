@@ -1,6 +1,8 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 
 const SkincareCircleShowcase = ({ items = [], isLoading = false, errorMessage = '' }) => {
+  const navigate = useNavigate()
   if (isLoading) {
     return (
       <section className='rounded-3xl border border-emerald-200 bg-white p-4 shadow-sm sm:p-5'>
@@ -34,7 +36,16 @@ const SkincareCircleShowcase = ({ items = [], isLoading = false, errorMessage = 
         {items.map((item) => (
           <article
             key={item.id}
-            className='group rounded-2xl bg-white/85 p-3 text-center shadow-sm ring-1 ring-emerald-100 transition hover:-translate-y-0.5 hover:shadow-md'
+            className='group cursor-pointer rounded-2xl bg-white/85 p-3 text-center shadow-sm ring-1 ring-emerald-100 transition hover:-translate-y-0.5 hover:shadow-md'
+            role='button'
+            tabIndex={0}
+            onClick={() => item.productId && navigate(`/product/${item.productId}`)}
+            onKeyDown={(event) => {
+              if ((event.key === 'Enter' || event.key === ' ') && item.productId) {
+                event.preventDefault()
+                navigate(`/product/${item.productId}`)
+              }
+            }}
           >
             <div className='mx-auto flex h-30 w-30 items-center justify-center rounded-full bg-linear-to-br from-emerald-100 to-cyan-100 p-2 ring-4 ring-white'>
               <div className='flex h-full w-full items-center justify-center overflow-hidden rounded-full bg-white'>

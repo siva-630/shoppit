@@ -1,4 +1,5 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 
 const sectionThemes = {
   mid: {
@@ -16,6 +17,7 @@ const sectionThemes = {
 }
 
 const MobileDealRow = ({ title, subtitle, items, tone = 'mid' }) => {
+  const navigate = useNavigate()
   const theme = sectionThemes[tone]
 
   if (!items.length) {
@@ -35,7 +37,16 @@ const MobileDealRow = ({ title, subtitle, items, tone = 'mid' }) => {
         {items.map((item) => (
           <article
             key={item.id}
-            className={`group overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-200 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${theme.glow}`}
+            className={`group cursor-pointer overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-200 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${theme.glow}`}
+            role='button'
+            tabIndex={0}
+            onClick={() => item.productId && navigate(`/product/${item.productId}`)}
+            onKeyDown={(event) => {
+              if ((event.key === 'Enter' || event.key === ' ') && item.productId) {
+                event.preventDefault()
+                navigate(`/product/${item.productId}`)
+              }
+            }}
           >
             <div className='relative h-56 overflow-hidden bg-linear-to-b from-white to-slate-50 p-3'>
               <span className={`absolute left-3 top-3 rounded-full px-2.5 py-1 text-xs font-semibold ${theme.badge}`}>
@@ -54,6 +65,12 @@ const MobileDealRow = ({ title, subtitle, items, tone = 'mid' }) => {
               <p className='mt-1 text-3xl font-black text-slate-950'>{item.priceText}</p>
               <button
                 type='button'
+                onClick={(event) => {
+                  event.stopPropagation()
+                  if (item.productId) {
+                    navigate(`/product/${item.productId}`)
+                  }
+                }}
                 className='mt-2 inline-flex items-center rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-white transition hover:bg-slate-700'
               >
                 View Deal

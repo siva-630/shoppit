@@ -1,8 +1,10 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { fetchForYouSuggestions } from '../services/dummyJsonProducts'
 
 const ForYouSuggestions = ({ onAddToWishlist, wishlistProductIds = [] }) => {
+  const navigate = useNavigate()
   const [products, setProducts] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
@@ -156,11 +158,11 @@ const ForYouSuggestions = ({ onAddToWishlist, wishlistProductIds = [] }) => {
             className='min-w-56 max-w-56 snap-start cursor-pointer rounded-xl bg-white p-2 shadow-sm ring-1 ring-slate-200'
             role='button'
             tabIndex={0}
-            onClick={() => window.open(`/product/${product.id}`, '_blank', 'noopener,noreferrer')}
+            onClick={() => navigate(`/product/${product.id}`)}
             onKeyDown={(event) => {
               if (event.key === 'Enter' || event.key === ' ') {
                 event.preventDefault()
-                window.open(`/product/${product.id}`, '_blank', 'noopener,noreferrer')
+                navigate(`/product/${product.id}`)
               }
             }}
           >
@@ -186,7 +188,7 @@ const ForYouSuggestions = ({ onAddToWishlist, wishlistProductIds = [] }) => {
                 type='button'
                 onClick={(event) => {
                   event.stopPropagation()
-                  window.open(`/product/${product.id}`, '_blank', 'noopener,noreferrer')
+                  navigate(`/product/${product.id}`)
                 }}
                 className='mt-1 text-xl font-bold leading-none text-slate-900 transition hover:text-slate-700'
               >

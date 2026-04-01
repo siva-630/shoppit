@@ -1,7 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 const WeddingStyleShowcase = ({ items = [], isLoading = false, errorMessage = '' }) => {
+  const navigate = useNavigate()
   const containerRef = useRef(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
@@ -79,7 +81,19 @@ const WeddingStyleShowcase = ({ items = [], isLoading = false, errorMessage = ''
         <div ref={containerRef} className='overflow-x-auto px-14 no-scrollbar'>
           <div className='flex w-max gap-4'>
             {items.map((item) => (
-              <article key={item.id} className='w-45 shrink-0'>
+              <article
+                key={item.id}
+                className='w-45 shrink-0 cursor-pointer'
+                role='button'
+                tabIndex={0}
+                onClick={() => item.productId && navigate(`/product/${item.productId}`)}
+                onKeyDown={(event) => {
+                  if ((event.key === 'Enter' || event.key === ' ') && item.productId) {
+                    event.preventDefault()
+                    navigate(`/product/${item.productId}`)
+                  }
+                }}
+              >
                 <div className='relative overflow-hidden rounded-3xl bg-orange-50'>
                   <img
                     src={item.image}

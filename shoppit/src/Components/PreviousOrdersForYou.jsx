@@ -1,8 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { PackageCheck, RotateCcw } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { fetchPreviousOrders } from '../services/dummyJsonProducts'
 
 const PreviousOrdersForYou = () => {
+  const navigate = useNavigate()
   const [orders, setOrders] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
@@ -85,7 +87,16 @@ const PreviousOrdersForYou = () => {
         {formattedOrders.map((order) => (
           <article
             key={order.id}
-            className='min-w-56 max-w-56 rounded-xl bg-white p-2 shadow-sm ring-1 ring-orange-200'
+            className='min-w-56 max-w-56 cursor-pointer rounded-xl bg-white p-2 shadow-sm ring-1 ring-orange-200'
+            role='button'
+            tabIndex={0}
+            onClick={() => navigate(`/product/${order.id}`)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault()
+                navigate(`/product/${order.id}`)
+              }
+            }}
           >
             <div className='flex h-36 items-center justify-center rounded-lg bg-orange-50 p-2'>
               <img
@@ -106,6 +117,10 @@ const PreviousOrdersForYou = () => {
 
               <button
                 type='button'
+                onClick={(event) => {
+                  event.stopPropagation()
+                  navigate(`/product/${order.id}`)
+                }}
                 className='mt-2 inline-flex items-center gap-1 rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 ring-1 ring-orange-200 transition hover:bg-orange-100'
               >
                 <RotateCcw className='h-3.5 w-3.5' />

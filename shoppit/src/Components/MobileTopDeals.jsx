@@ -1,6 +1,8 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 
 const MobileTopDeals = ({ items = [], isLoading = false, errorMessage = '' }) => {
+  const navigate = useNavigate()
   if (isLoading) {
     return (
       <section className='rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5'>
@@ -31,7 +33,16 @@ const MobileTopDeals = ({ items = [], isLoading = false, errorMessage = '' }) =>
         {items.map((item) => (
           <article
             key={item.id}
-            className='overflow-hidden rounded-3xl bg-[#c8bdf3] ring-1 ring-[#bcaef1]'
+            className='cursor-pointer overflow-hidden rounded-3xl bg-[#c8bdf3] ring-1 ring-[#bcaef1]'
+            role='button'
+            tabIndex={0}
+            onClick={() => item.productId && navigate(`/product/${item.productId}`)}
+            onKeyDown={(event) => {
+              if ((event.key === 'Enter' || event.key === ' ') && item.productId) {
+                event.preventDefault()
+                navigate(`/product/${item.productId}`)
+              }
+            }}
           >
             <div className='relative h-72 bg-[#c8bdf3] p-3'>
               <img

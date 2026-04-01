@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { fetchAllProductsPage } from '../services/dummyJsonProducts'
 
 const PAGE_SIZE = 24
@@ -15,6 +16,7 @@ const mergeUniqueProducts = (previousProducts, incomingProducts) => {
 }
 
 const AllBeautyProductsFeed = () => {
+  const navigate = useNavigate()
   const [products, setProducts] = useState([])
   const [rawSkip, setRawSkip] = useState(0)
   const [rawTotal, setRawTotal] = useState(0)
@@ -160,11 +162,11 @@ const AllBeautyProductsFeed = () => {
               className='group cursor-pointer rounded-xl bg-white p-2 ring-1 ring-pink-100 transition hover:shadow-md'
               role='button'
               tabIndex={0}
-              onClick={() => window.open(`/product/${product.id}`, '_blank', 'noopener,noreferrer')}
+              onClick={() => navigate(`/product/${product.id}`)}
               onKeyDown={(event) => {
                 if (event.key === 'Enter' || event.key === ' ') {
                   event.preventDefault()
-                  window.open(`/product/${product.id}`, '_blank', 'noopener,noreferrer')
+                  navigate(`/product/${product.id}`)
                 }
               }}
             >

@@ -300,6 +300,7 @@ export const mapProductsToSlides = (products, pathname) => {
 
   return products.slice(0, MAX_SLIDES).map((product, index) => ({
     id: `${product.id}-${pathname}-${index}`,
+    productId: product.id,
     image: product.thumbnail || product.images?.[0],
     alt: product.title,
     title: product.title,
@@ -409,6 +410,7 @@ export const fetchFashionReferenceTypes = async (signal) => {
 
     return {
       id: `${item.categorySlug}-${index}`,
+      productId: selectedProduct?.id,
       label: item.label,
       audience: item.audience,
       image: selectedProduct?.thumbnail || selectedProduct?.images?.[0] || '',
@@ -456,6 +458,7 @@ export const fetchFashionPriceCollections = async (signal) => {
 
     return {
       id: `price-collection-${product.id}-${index}`,
+      productId: product.id,
       title: product.title,
       image: product.thumbnail || product.images?.[0] || '',
       priceCap: roundedPriceCap,
@@ -483,6 +486,7 @@ export const fetchWeddingStyleShowcase = async (signal) => {
 
     return {
       id: `wedding-style-${item.categorySlug}-${index}`,
+      productId: selectedProduct?.id,
       label: item.label,
       promoText: item.promoText,
       image: selectedProduct?.thumbnail || selectedProduct?.images?.[0] || '',
@@ -510,6 +514,7 @@ export const fetchOccasionSpecificCollections = async (signal) => {
 
     return {
       id: `occasion-${item.categorySlug}-${index}`,
+      productId: selectedProduct?.id,
       label: item.label,
       caption: item.caption,
       image: selectedProduct?.thumbnail || selectedProduct?.images?.[0] || '',
@@ -543,6 +548,7 @@ export const fetchMobileBrands = async (signal) => {
 
     brandMap.set(normalizedBrand, {
       id: `mobile-brand-${normalizedBrand.replace(/\s+/g, '-')}`,
+      productId: product.id,
       label: brandName,
       image: product.thumbnail || product.images?.[0] || '',
       alt: `${brandName} phones`,
@@ -572,6 +578,7 @@ export const fetchMobileBrands = async (signal) => {
 
       brandMap.set(normalizedBrand, {
         id: `mobile-brand-${normalizedBrand.replace(/\s+/g, '-')}`,
+        productId: product.id,
         label: brandName,
         image: product.thumbnail || product.images?.[0] || '',
         alt: `${brandName} phones`,
@@ -642,6 +649,7 @@ export const fetchMobileTopDeals = async (signal) => {
 
     return {
       id: `mobile-top-deal-${product.id}-${index}`,
+      productId: product.id,
       title: product.title,
       image: product.thumbnail || product.images?.[0] || '',
       priceText: `From ₹${new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 }).format(roundedDealPrice)}`,
@@ -698,6 +706,7 @@ export const fetchPremiumSmartphoneDeals = async (signal) => {
 
     return {
       id: `premium-smartphone-deal-${product.id}-${index}`,
+      productId: product.id,
       title: product.title,
       image: product.thumbnail || product.images?.[0] || '',
       priceText: `From ₹${new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 }).format(roundedPrice)}*`,
@@ -746,6 +755,7 @@ export const fetchMobileRangeDeals = async (signal) => {
 
     return {
       id: `${bucket}-deal-${product.id}-${index}`,
+      productId: product.id,
       title: product.title,
       image: product.thumbnail || product.images?.[0] || '',
       priceText: `₹${new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 }).format(inrPrice)}`,
@@ -804,6 +814,7 @@ export const fetchBeautyLaunchPartyDeals = async (signal) => {
     const discount = Math.max(10, Math.round(Number(product?.discountPercentage) || 0))
     return {
       id: `beauty-launch-${product.id}-${index}`,
+      productId: product.id,
       title: product.title,
       image: product.thumbnail || product.images?.[0] || '',
       offerText: `Up to ${discount}% Off`,
@@ -844,6 +855,7 @@ export const fetchSkincareCircleItems = async (signal) => {
 
   return products.slice(0, SKINCARE_CIRCLE_ITEMS_LIMIT).map((product, index) => ({
     id: `skincare-circle-${product.id}-${index}`,
+    productId: product.id,
     title: product.title,
     image: product.thumbnail || product.images?.[0] || '',
     subtitle: product.brand || 'Skin Care',
@@ -877,6 +889,7 @@ export const fetchBeautyMiniCards = async (signal) => {
 
     return {
       id: `beauty-mini-card-${item.label.toLowerCase().replace(/\s+/g, '-')}-${index}`,
+      productId: selectedProduct?.id,
       label: item.label,
       icon: item.icon,
       image: selectedProduct?.thumbnail || selectedProduct?.images?.[0] || '',

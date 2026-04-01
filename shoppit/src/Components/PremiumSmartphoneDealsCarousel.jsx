@@ -1,7 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 const PremiumSmartphoneDealsCarousel = ({ items = [], isLoading = false, errorMessage = '' }) => {
+  const navigate = useNavigate()
   const trackRef = useRef(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
@@ -69,7 +71,16 @@ const PremiumSmartphoneDealsCarousel = ({ items = [], isLoading = false, errorMe
             {items.map((item) => (
               <article
                 key={item.id}
-                className='w-74 shrink-0 overflow-hidden rounded-3xl border border-[#9b7ac7] bg-[#cdbce8]'
+                className='w-74 shrink-0 cursor-pointer overflow-hidden rounded-3xl border border-[#9b7ac7] bg-[#cdbce8]'
+                role='button'
+                tabIndex={0}
+                onClick={() => item.productId && navigate(`/product/${item.productId}`)}
+                onKeyDown={(event) => {
+                  if ((event.key === 'Enter' || event.key === ' ') && item.productId) {
+                    event.preventDefault()
+                    navigate(`/product/${item.productId}`)
+                  }
+                }}
               >
                 <div
                   className='h-88 bg-cover bg-center p-3'

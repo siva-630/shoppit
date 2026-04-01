@@ -1,6 +1,8 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 
 const OccasionSpecificCollections = ({ items = [], isLoading = false, errorMessage = '' }) => {
+  const navigate = useNavigate()
   if (isLoading) {
     return (
       <section className='rounded-2xl border border-gray-200 bg-white p-4 shadow-sm sm:p-5'>
@@ -35,7 +37,19 @@ const OccasionSpecificCollections = ({ items = [], isLoading = false, errorMessa
 
       <div className='mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5'>
         {items.map((item) => (
-          <article key={item.id} className='group overflow-hidden rounded-2xl border border-gray-100 bg-gray-50'>
+          <article
+            key={item.id}
+            className='group cursor-pointer overflow-hidden rounded-2xl border border-gray-100 bg-gray-50'
+            role='button'
+            tabIndex={0}
+            onClick={() => item.productId && navigate(`/product/${item.productId}`)}
+            onKeyDown={(event) => {
+              if ((event.key === 'Enter' || event.key === ' ') && item.productId) {
+                event.preventDefault()
+                navigate(`/product/${item.productId}`)
+              }
+            }}
+          >
             <div className='relative h-72 overflow-hidden bg-gray-100'>
               {item.image ? (
                 <img

@@ -1,9 +1,11 @@
 import React from 'react'
 import { Star } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { formatCurrencyFromUsd } from '../utils/searchSpecs'
 
 // Reusable compact product card for search results grid.
 const ProductResultCard = ({ product }) => {
+  const navigate = useNavigate()
   const image = product.thumbnail || product.images?.[0]
   const rating = Number(product.rating || 0)
   const discount = Math.max(0, Math.round(Number(product.discountPercentage || 0)))
@@ -19,11 +21,11 @@ const ProductResultCard = ({ product }) => {
       className='cursor-pointer overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition hover:shadow-md'
       role='button'
       tabIndex={0}
-      onClick={() => window.open(productDetailsUrl, '_blank', 'noopener,noreferrer')}
+      onClick={() => navigate(productDetailsUrl)}
       onKeyDown={(event) => {
         if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault()
-          window.open(productDetailsUrl, '_blank', 'noopener,noreferrer')
+          navigate(productDetailsUrl)
         }
       }}
       aria-label={`Open details for ${product.title}`}

@@ -1,5 +1,6 @@
 import React from 'react'
 import { ArrowRight } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 const cardToneClasses = [
   'bg-lime-50',
@@ -10,6 +11,7 @@ const cardToneClasses = [
 ]
 
 const PriceWiseCollections = ({ items = [], isLoading = false, errorMessage = '' }) => {
+  const navigate = useNavigate()
   if (isLoading) {
     return (
       <section className='rounded-2xl border border-gray-200 bg-white p-4 shadow-sm sm:p-5'>
@@ -45,7 +47,16 @@ const PriceWiseCollections = ({ items = [], isLoading = false, errorMessage = ''
         {items.map((item, index) => (
           <article
             key={item.id}
-            className={`group relative min-h-64 overflow-hidden rounded-3xl ${cardToneClasses[index % cardToneClasses.length]}`}
+            className={`group relative min-h-64 cursor-pointer overflow-hidden rounded-3xl ${cardToneClasses[index % cardToneClasses.length]}`}
+            role='button'
+            tabIndex={0}
+            onClick={() => item.productId && navigate(`/product/${item.productId}`)}
+            onKeyDown={(event) => {
+              if ((event.key === 'Enter' || event.key === ' ') && item.productId) {
+                event.preventDefault()
+                navigate(`/product/${item.productId}`)
+              }
+            }}
           >
             <img
               src={item.image}
@@ -68,6 +79,12 @@ const PriceWiseCollections = ({ items = [], isLoading = false, errorMessage = ''
                 <p className='line-clamp-2 min-h-10 flex-1 pr-2 text-sm font-medium text-gray-900'>{item.title}</p>
                 <button
                   type='button'
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    if (item.productId) {
+                      navigate(`/product/${item.productId}`)
+                    }
+                  }}
                   className='rounded-full bg-white/95 p-2 text-gray-900 shadow-sm ring-1 ring-black/10 transition hover:bg-white'
                   aria-label={`Explore items under ${item.priceCap} rupees`}
                 >

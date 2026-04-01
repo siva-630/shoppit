@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 import slideOne from '../assets/sidebar/Gemini_Generated_Image_3nv8zm3nv8zm3nv8.png'
 import slideTwo from '../assets/sidebar/Gemini_Generated_Image_5ntsz5ntsz5ntsz5.png'
@@ -10,6 +11,7 @@ import slidesix from '../assets/sidebar/Gemini_Generated_Image_2arfe32arfe32arf.
 import slideSeven from '../assets/sidebar/Gemini_Generated_Image_w0nrarw0nrarw0nr.png'
 import slideeight from '../assets/sidebar/Gemini_Generated_Image_329how329how329h.png'
 const Slidebars = ({ slides: incomingSlides = [], isLoading = false, errorMessage = '' }) => {
+  const navigate = useNavigate()
   const defaultSlides = useMemo(
     () => [
       { id: 1, image: slideOne, alt: 'Shoppit promotional slide 1' },
@@ -74,6 +76,7 @@ const Slidebars = ({ slides: incomingSlides = [], isLoading = false, errorMessag
 
   const activeSlide = slides[currentSlide]
   const hasProductDetails = Boolean(activeSlide?.title)
+  const activeSlideProductId = activeSlide?.productId
   const convertedInrPrice =
     activeSlide?.price !== undefined
       ? new Intl.NumberFormat('en-IN', {
@@ -94,12 +97,19 @@ const Slidebars = ({ slides: incomingSlides = [], isLoading = false, errorMessag
               key={slide.id}
               src={slide.image}
               alt={slide.alt ?? slide.title ?? `Slide ${index + 1}`}
+              onClick={() => {
+                if (isActive && slide.productId) {
+                  navigate(`/product/${slide.productId}`)
+                }
+              }}
               className={`absolute inset-0 h-full w-full transition-all duration-700 ${
                 hasProductDetails
                   ? 'bg-white p-4 object-contain'
                   : 'object-cover'
               } ${
-                isActive ? 'scale-100 opacity-100' : 'scale-100 opacity-0'
+                isActive
+                  ? `scale-100 opacity-100 ${slide.productId ? 'cursor-pointer' : ''}`
+                  : 'scale-100 opacity-0'
               }`}
             />
           )
@@ -117,6 +127,15 @@ const Slidebars = ({ slides: incomingSlides = [], isLoading = false, errorMessag
               <p className='mt-0.5 text-sm font-bold text-emerald-700'>
                 {convertedInrPrice}
               </p>
+            ) : null}
+            {activeSlideProductId ? (
+              <button
+                type='button'
+                onClick={() => navigate(`/product/${activeSlideProductId}`)}
+                className='mt-2 inline-flex rounded-md bg-slate-900 px-2.5 py-1 text-xs font-semibold text-white transition hover:bg-slate-700'
+              >
+                View Product
+              </button>
             ) : null}
           </div>
         ) : null}

@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import FashionReferenceTypes from '../Components/FashionReferenceTypes'
 import OccasionSpecificCollections from '../Components/OccasionSpecificCollections'
 import PriceWiseCollections from '../Components/PriceWiseCollections'
@@ -13,6 +14,7 @@ import {
 } from '../services/dummyJsonProducts'
 
 const Fashion = () => {
+  const navigate = useNavigate()
   const [smallCards, setSmallCards] = useState([])
   const [isLoadingCards, setIsLoadingCards] = useState(false)
   const [cardError, setCardError] = useState('')
@@ -228,7 +230,19 @@ const Fashion = () => {
             <div ref={cardsContainerRef} className='overflow-x-auto px-14 no-scrollbar'>
               <div className='grid grid-flow-col grid-rows-2 auto-cols-[122px] gap-3 sm:auto-cols-[130px] sm:gap-4'>
                 {smallCards.map((item, index) => (
-                  <article key={item.id} className='group'>
+                  <article
+                    key={item.id}
+                    className='group cursor-pointer'
+                    role='button'
+                    tabIndex={0}
+                    onClick={() => navigate(`/product/${item.id}`)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault()
+                        navigate(`/product/${item.id}`)
+                      }
+                    }}
+                  >
                     <div
                       className={`h-29.5 overflow-hidden rounded-2xl ${toneClasses[index % toneClasses.length]}`}
                     >

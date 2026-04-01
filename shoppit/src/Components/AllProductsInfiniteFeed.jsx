@@ -1,9 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { fetchAllProductsPage } from '../services/dummyJsonProducts'
 
 const PAGE_SIZE = 18
 
 const AllProductsInfiniteFeed = () => {
+  const navigate = useNavigate()
   const [products, setProducts] = useState([])
   const [totalProducts, setTotalProducts] = useState(0)
   const [isInitialLoading, setIsInitialLoading] = useState(true)
@@ -142,11 +144,11 @@ const AllProductsInfiniteFeed = () => {
               className='cursor-pointer rounded-xl bg-white p-2 ring-1 ring-slate-200 transition hover:shadow-sm'
               role='button'
               tabIndex={0}
-              onClick={() => window.open(`/product/${product.id}`, '_blank', 'noopener,noreferrer')}
+              onClick={() => navigate(`/product/${product.id}`)}
               onKeyDown={(event) => {
                 if (event.key === 'Enter' || event.key === ' ') {
                   event.preventDefault()
-                  window.open(`/product/${product.id}`, '_blank', 'noopener,noreferrer')
+                  navigate(`/product/${product.id}`)
                 }
               }}
             >

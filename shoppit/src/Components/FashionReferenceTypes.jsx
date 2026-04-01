@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 const audienceTitleMap = {
   men: 'Men Styles',
@@ -9,6 +10,7 @@ const audienceTitleMap = {
 const audienceOrder = ['men', 'women', 'unisex']
 
 const FashionReferenceTypes = ({ items = [], isLoading = false, errorMessage = '' }) => {
+  const navigate = useNavigate()
   const groupedItems = useMemo(() => {
     return items.reduce(
       (accumulator, item) => {
@@ -68,7 +70,19 @@ const FashionReferenceTypes = ({ items = [], isLoading = false, errorMessage = '
 
               <div className='mt-3 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4'>
                 {sectionItems.map((item) => (
-                  <article key={item.id} className='text-center'>
+                  <article
+                    key={item.id}
+                    className='cursor-pointer text-center'
+                    role='button'
+                    tabIndex={0}
+                    onClick={() => item.productId && navigate(`/product/${item.productId}`)}
+                    onKeyDown={(event) => {
+                      if ((event.key === 'Enter' || event.key === ' ') && item.productId) {
+                        event.preventDefault()
+                        navigate(`/product/${item.productId}`)
+                      }
+                    }}
+                  >
                     <div className='mx-auto h-36 w-full max-w-42.5 overflow-hidden rounded-t-full rounded-b-2xl bg-[#efe5ef] sm:h-40'>
                       <img
                         src={item.image}
